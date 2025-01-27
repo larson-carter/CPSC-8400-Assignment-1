@@ -32,12 +32,45 @@ except:
 # with values 0, 100, 200, 8300, 8400, 8300, 8200, ...
 # Don't forget to switch your code back to calling
 # grader.call_grader() before submitting.
-def call_grader_local(x):
-    result = []
-    for i in range(len(x)):
-        result.append(1.0 - abs(x[i] - 0.8400))
-    return result
+def getSystemGrader(x):
+    return grader.call_grader(x)
 
+    # result = []
+    # for i in range(len(x)):
+    #     result.append(1.0 - abs(x[i] - 0.8400))
+    # return result
+
+def generateRandomValue(K):
+    return [random.random() for _ in range(K)]
+
+def calcValue(K, getSystemGrader):
+    xValueSet = generateRandomValue(K)
+    yValueSet = getSystemGrader(xValueSet)
+    return xValueSet, yValueSet
+
+def updateBestValue(best, x, y):
+    if y > best:
+        bestYValue = y
+        bestXValue = x
+        return bestYValue, bestXValue
+    return best, None
+
+def calcPreciseXValue(K, R, getSystemGrader):
+    bestYValue = -float('inf')
+    bestXValue = 0.5
+
+    for z in range(R):
+        xValueSet, yValueSet = calcValue(K, getSystemGrader)
+
+        for x, y in zip(xValueSet, yValueSet):
+            if y == -1:
+                continue
+            newBest, newXValue = updateBestValue(bestYValue, x, y)
+            if newXValue is not None:
+                bestYValue = newBest
+                bestXValue = newXValue
+
+    return bestXValue
 
 def main():
     # Values for K and R are set in the grading system
@@ -51,37 +84,9 @@ def main():
         K = 4
         R = 7
 
-    my_answer = 0.5
+    result = calcPreciseXValue(K, R, getSystemGrader)
 
-    # ----------------------------------------
-    # This is the part of main() you should modify.
-    # For each of R rounds,
-    # you can evaluate f(x) at K values of x
-    # (you are welcome to write other functions above
-    # and call them here, but all your code should be
-    # submitted in this one file).
-
-    best = 0.0;
-    for i in range(R):
-        x = []
-        # Right now, we're not being particularly smart --
-        # we're just evaluating at random values of x
-        # and taking whichever one was the best as our answer.
-        for j in range(K):
-            x.append(random.random())
-        y = call_grader_local(x)  # call_grader_local needs to be switched to grader.call_grader when you submit!!
-        for j in range(K):
-            if y[j] > best:
-                best = y[j]
-                my_answer = x[j]
-    # ----------------------------------------
-
-    # Afterwards, you should print out the value of
-    # an index i for which A[i] is closest to T.
-    # You should only print this number on standard output,
-    # nothing else.
-    print(my_answer)
-
+    print(result)
 
 if __name__ == "__main__":
     main()

@@ -28,9 +28,44 @@ except:
 # with values 0, 100, 200, 8300, 8400, 8300, 8200, ...
 # Don't forget to switch your code back to calling
 # grader.call_grader() before submitting.
-def call_grader_local(i):
-    return 8400 - abs(84 - i) * 100
+def getSystemGrader(i):
+    return grader.call_grader(i)
+    #return 8400 - abs(84 - i) * 100
 
+def search(low, high, N, getSystemGrader):
+    while high - low > 2:
+        midPoint1, midPoint2 = (low + (high - low) // 3), (high - (high - low) // 3)
+        pointOne, pointTwo = getSystemGrader(midPoint1), getSystemGrader(midPoint2)
+        low, high = (midPoint1, high) if pointOne < pointTwo else (low, midPoint2)
+
+    return low, high
+
+def maxPosition(low, high, getSystemGrader):
+    maxValue = -float('inf')
+    highestPointIndex = -1
+
+    for i in range(low, high + 1):
+        value = getSystemGrader(i)
+        if value == -1:
+            continue
+        if value > maxValue:
+            maxValue = value
+            highestPointIndex = i
+
+    return maxValue, highestPointIndex
+
+def find_highestPointIndex(N, getSystemGrader):
+    low = 0
+    high = N - 1
+    highestPointIndex = -1
+    maxValue = -float('inf')
+    low, high = search(low, high, N, getSystemGrader)
+    maxValue, highestPointIndex = maxPosition(low, high, getSystemGrader)
+
+    if highestPointIndex == -1:
+        highestPointIndex = 0
+
+    return highestPointIndex
 
 def main():
     # Value for N is set in the grading system
@@ -42,32 +77,9 @@ def main():
     except:
         N = 100
 
-    my_answer = 50
+    solution = find_highestPointIndex(N, getSystemGrader)
 
-    # ----------------------------------------
-    # This is the part of main() you should modify.
-    # (you are welcome to write other functions above
-    # and call them here, but all your code should be
-    # submitted in this one file).
-
-    m = 0.0;
-    for i in range(N):
-        value = call_grader_local(
-            float(i))  # call_grader_local needs to be switched to grader.call_grader when you submit!!
-        if value == -1:
-            break
-        if value > m:
-            my_answer = i
-            m = value
-
-    # ----------------------------------------
-
-    # Afterwards, you should print out the value of
-    # an index i for which A[i] is closest to the maximum.
-    # You should only print this number on standard output,
-    # nothing else.
-    print(my_answer)
-
+    print(solution)
 
 if __name__ == "__main__":
     main()

@@ -33,6 +33,67 @@ def call_grader_local(i):
          6000, 7000, 8000, 9000, 10000]
     return A[i]
 
+def getSystemGrader(i):
+    return grader.call_grader(i)
+    #return call_grader_local(i)
+
+def checkLowParam(low, N, T, getSystemGrader, difference, index):
+    if low < N:
+        lowParam = getSystemGrader(low)
+        if lowParam != -1:
+            distanceLowParam = abs(lowParam - T)
+            if distanceLowParam < difference:
+                difference = distanceLowParam
+                index = low
+    return difference, index
+
+def checkHighParam(high, N, T, getSystemGrader, difference, index):
+    if high >= 0:
+        highParam = getSystemGrader(high)
+        if highParam != -1:
+            distanceHighParam = abs(highParam - T)
+            if distanceHighParam < difference:
+                difference = distanceHighParam
+                index = high
+    return difference, index
+
+def findNearestValue(N, T):
+    low = 0
+    high = N - 1
+    index = -1
+    difference = float('inf')
+
+    while low <= high:
+        mid = (low + high) // 2
+        value = getSystemGrader(mid)
+
+        if value == -1:
+            break
+
+        diff = abs(value - T)
+
+        if diff < difference:
+            difference = diff
+            index = mid
+
+        # Punch the search pointers based on comparison
+        if value < T:
+            low = mid + 1
+        elif value > T:
+            high = mid - 1
+        else:
+            index = mid
+            break
+
+    if difference != 0:
+        difference, index = checkLowParam(low, N, T, getSystemGrader, difference, index)
+        difference, index = checkHighParam(high, N, T, getSystemGrader, difference, index)
+
+    # No valid index was found
+    if index == -1:
+        index = 0
+
+    return index
 
 def main():
     # Values for N and T are set in the grading system
@@ -47,30 +108,9 @@ def main():
         N = 10
         T = 8400
 
-    my_answer = 5
+    index = findNearestValue(N, T)
 
-    # ----------------------------------------
-    # This is the part of main() you should modify.
-    # (you are welcome to write other functions above
-    # and call them here, but all your code should be
-    # submitted in this one file).
-
-    closest = 999999999
-    for i in range(N):
-        value = call_grader_local(i)  # call_grader_local needs to be switched to grader.call_grader when you submit!!
-        if value == -1:
-            break
-        if abs(value - T) < closest:
-            my_answer = i
-            closest = abs(value - T)
-    # ----------------------------------------
-
-    # Afterwards, you should print out the value of
-    # an index i for which A[i] is closest to T.
-    # You should only print this number on standard output,
-    # nothing else.
-    print(my_answer)
-
+    print(index)
 
 if __name__ == "__main__":
     main()
